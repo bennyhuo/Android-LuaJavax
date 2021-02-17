@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "lua.h"
 
@@ -483,7 +484,7 @@ const char *luaO_pushfstring (lua_State *L, const char *fmt, ...) {
 
 #define addstr(a,b,l)	( memcpy(a,b,(l) * sizeof(char)), a += (l) )
 
-void luaO_chunkid (char *out, const char *source, size_t bufflen) {
+void luaO_chunkid (char *out, const char *source, size_t bufflen, int line) {
   size_t l = strlen(source);
   if (*source == '=') {  /* 'literal' source */
     if (l <= bufflen)  /* small enough? */
@@ -503,17 +504,35 @@ void luaO_chunkid (char *out, const char *source, size_t bufflen) {
     }
   }
   else {  /* string; format as [string "source"] */
-    const char *nl = strchr(source, '\n');  /* find first new line (if any) */
+    // Find the specified line of code.
+    const char *line_start = source;
+    const char *line_end = strchr(source, '\n');
+    int i = 1;
+    while (i < line && line_end != NULL) {
+      line_start = ++line_end;
+      line_end = strchr(line_end, '\n');
+      i++;
+    }
+
+    /*skip whitespaces at the beginning.*/
+    while(line_start != NULL  && isspace(*line_start)){
+      line_start++;
+    }
+
+    unsigned int line_length = line_end == NULL ? l - (line_start - source) : line_end - line_start;
+
     addstr(out, PRE, LL(PRE));  /* add prefix */
     bufflen -= LL(PRE RETS POS) + 1;  /* save space for prefix+suffix+'\0' */
-    if (l < bufflen && nl == NULL) {  /* small one-line source? */
-      addstr(out, source, l);  /* keep it */
+    if (line_length < bufflen && line_end == NULL) {  /* small one-line source? */
+      addstr(out, line_start, line_length);  /* keep it */
     }
     else {
-      if (nl != NULL) l = nl - source;  /* stop at first newline */
-      if (l > bufflen) l = bufflen;
-      addstr(out, source, l);
-      addstr(out, RETS, LL(RETS));
+      if (line_length > bufflen) {
+        addstr(out, line_start, bufflen - 3); /*save space for ...*/
+        addstr(out, RETS, LL(RETS));
+      } else {
+        addstr(out, line_start, line_length);
+      }
     }
     memcpy(out, POS, (LL(POS) + 1) * sizeof(char));
   }

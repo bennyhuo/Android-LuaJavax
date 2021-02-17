@@ -221,7 +221,7 @@ static void funcinfo (lua_Debug *ar, Closure *cl) {
     ar->lastlinedefined = p->lastlinedefined;
     ar->what = (ar->linedefined == 0) ? "main" : "Lua";
   }
-  luaO_chunkid(ar->short_src, ar->source, LUA_IDSIZE);
+  luaO_chunkid(ar->short_src, ar->source, LUA_IDSIZE, -1);
 }
 
 
@@ -610,7 +610,7 @@ const char *luaG_addinfo (lua_State *L, const char *msg, TString *src,
                                         int line) {
   char buff[LUA_IDSIZE];
   if (src)
-    luaO_chunkid(buff, getstr(src), LUA_IDSIZE);
+    luaO_chunkid(buff, getstr(src), LUA_IDSIZE, line);
   else {  /* no source available; use "?" instead */
     buff[0] = '?'; buff[1] = '\0';
   }
@@ -631,13 +631,17 @@ l_noret luaG_errormsg (lua_State *L) {
 
 
 l_noret luaG_runerror (lua_State *L, const char *fmt, ...) {
-  CallInfo *ci = L->ci;
   const char *msg;
   va_list argp;
   va_start(argp, fmt);
   msg = luaO_pushvfstring(L, fmt, argp);  /* format message */
   va_end(argp);
-  if (isLua(ci))  /* if Lua function, add source:line information */
+  // If it's a Java method, find the calling Lua function recursively.
+  CallInfo *ci = L->ci;
+  while(ci != NULL && !isLua(ci)){
+    ci = ci->previous;
+  }
+  if (ci)  /* 'ci' is Lua function, add source:line information */
     luaG_addinfo(L, msg, ci_func(ci)->p->source, currentline(ci));
   luaG_errormsg(L);
 }

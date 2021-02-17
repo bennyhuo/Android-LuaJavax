@@ -8,6 +8,7 @@
 #include "lualib.h"
 #include "luajava.h"
 
+#include "ldebug.h"
 
 
 /* Constant that is used to index the JNI Environment */
@@ -362,8 +363,7 @@ int objectIndex( lua_State * L )
 
    if ( !lua_isnumber( L , -1 ) )
    {
-      lua_pushstring( L , "Impossible to identify luaState id." );
-      lua_error( L );
+      luaG_runerror(L, "Impossible to identify luaState id.");
    }
 
    stateIndex = lua_tonumber( L , -1 );
@@ -371,23 +371,20 @@ int objectIndex( lua_State * L )
 
    if ( !lua_isstring( L , -1 ) )
    {
-      lua_pushstring( L , "Invalid Function call." );
-      lua_error( L );
+      luaG_runerror(L, "Invalid Function call.");
    }
 
    key = lua_tostring( L , -1 );
 
    if ( !isJavaObject( L , 1 ) )
    {
-      lua_pushstring( L , "Not a valid Java Object." );
-      lua_error( L );
+      luaG_runerror(L, "Not a valid Java Object.");
    }
 
    javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror(L, "Invalid JNI Environment.");
    }
 
    obj = ( jobject * ) lua_touserdata( L , 1 );
@@ -441,8 +438,7 @@ int objectIndex( lua_State * L )
 
    if ( !lua_istable( L , -1 ) )
    {
-      lua_pushstring( L , "Invalid MetaTable." );
-      lua_error( L );
+      luaG_runerror(L, "Invalid MetaTable.");
    }
 
    lua_pushstring( L , LUAJAVAOBJFUNCCALLED );
@@ -479,8 +475,7 @@ int objectIndexReturn( lua_State * L )
 
    if ( !lua_isnumber( L , -1 ) )
    {
-      lua_pushstring( L , "Impossible to identify luaState id." );
-      lua_error( L );
+      luaG_runerror(L, "Impossible to identify luaState id.");
    }
 
    stateIndex = lua_tonumber( L , -1 );
@@ -489,23 +484,20 @@ int objectIndexReturn( lua_State * L )
    /* Checks if is a valid java object */
    if ( !isJavaObject( L , 1 ) )
    {
-      lua_pushstring( L , "Not a valid OO function call." );
-      lua_error( L );
+      luaG_runerror(L, "Not a valid OO function call.");
    }
 
    lua_getmetatable( L , 1 );
    if ( lua_type( L , -1 ) == LUA_TNIL )
    {
-      lua_pushstring( L , "Not a valid java Object." );
-      lua_error( L );
+      luaG_runerror(L, "Not a valid java Object.");
    }
 
    lua_pushstring( L , LUAJAVAOBJECTIND );
    lua_rawget( L , -2 );
    if ( lua_type( L , -1 ) == LUA_TNIL )
    {
-      lua_pushstring( L , "Not a valid java Object." );
-      lua_error( L );
+      luaG_runerror(L, "Not a valid java Object.");
    }
    lua_pop( L , 1 );
 
@@ -514,8 +506,7 @@ int objectIndexReturn( lua_State * L )
    lua_rawget( L , -2 );
    if ( lua_type( L , -1 ) == LUA_TNIL )
    {
-      lua_pushstring( L , "Not a OO function call." );
-      lua_error( L );
+      luaG_runerror(L, "Not a OO function call.");
    }
    methodName = lua_tostring( L , -1 );
 
@@ -528,8 +519,7 @@ int objectIndexReturn( lua_State * L )
    javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror(L, "Invalid JNI Environment.");
    }
 
    /* Gets method */
@@ -600,8 +590,7 @@ int classIndex( lua_State * L )
 
    if ( !lua_isnumber( L , -1 ) )
    {
-      lua_pushstring( L , "Impossible to identify luaState id." );
-      lua_error( L );
+      luaG_runerror(L, "Impossible to identify luaState id.");
    }
 
    stateIndex = lua_tonumber( L , -1 );
@@ -609,16 +598,14 @@ int classIndex( lua_State * L )
 
    if ( !isJavaObject( L , 1 ) )
    {
-      lua_pushstring( L , "Not a valid java class." );
-      lua_error( L );
+      luaG_runerror(L, "Not a valid java class.");
    }
 
    /* Gets the field Name */
 
    if ( !lua_isstring( L , 2 ) )
    {
-      lua_pushstring( L , "Not a valid field call." );
-      lua_error( L );
+      luaG_runerror(L, "Not a valid field call.");
    }
 
    fieldName = lua_tostring( L , 2 );
@@ -630,8 +617,7 @@ int classIndex( lua_State * L )
    javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror(L, "Invalid JNI Environment.");
    }
 
    method = ( *javaEnv )->GetStaticMethodID( javaEnv , luajava_api_class , "classIndex" ,
@@ -677,8 +663,7 @@ int classIndex( lua_State * L )
 
    if ( ret == 0 )
    {
-      lua_pushstring( L , "Name is not a static field or function." );
-      lua_error( L );
+      luaG_runerror(L, "Name is not a static field or function.");
    }
 
    if ( ret == 2 )
@@ -720,8 +705,7 @@ int gc( lua_State * L )
    javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror(L, "Invalid JNI Environment.");
    }
 
    ( *javaEnv )->DeleteGlobalRef( javaEnv , *pObj );
