@@ -1,0 +1,8 @@
+build
+.gradle
+.idea
+local.properties
+captures
+.cxx
+.externalNativeBuild
+out
