@@ -446,22 +446,42 @@ int objectIndex( lua_State * L )
    }
 
    // It's an OO function call.
-   lua_getmetatable( L , 1 );
+  lua_getmetatable(L, 1);
 
-   if ( !lua_istable( L , -1 ) )
-   {
-      luaG_runerror(L, "Invalid MetaTable.");
-   }
+  if (!lua_istable(L, -1)) {
+    luaG_runerror(L, "Invalid MetaTable.");
+  }
 
-   lua_pushstring( L , LUAJAVAOBJFUNCCALLED );
-   lua_pushstring( L , key );
-   lua_rawset( L , -3 );
+  lua_pushstring(L, LUAJAVAOBJFUNCCALLED);
+  // function_names = metatable[stack[-2]]
+  // stack[-1] = function_names
+  lua_rawget(L, -2);
 
-   lua_pop( L , 1 );
+  // function_names == nil ?
+  if (lua_isnil(L, -1)) {
+    // pop nil
+    lua_pop(L, 1);
+    lua_pushstring(L, LUAJAVAOBJFUNCCALLED);
+    lua_newtable(L);
 
-   lua_pushcfunction( L , &objectIndexReturn );
+    // | function_names | LUAJAVAOBJFUNCCALLED | metatable |
+    // |        -1      |         -2           |    -3     |
+    // -> metable[LUAJAVAOBJFUNCCALLED] = function_names
+    lua_rawset(L, -3);
 
-   return 1;
+    lua_pushstring(L, LUAJAVAOBJFUNCCALLED);
+    lua_rawget(L, -2);
+  }
+
+  size_t nameSize = lua_rawlen(L, -1);
+  lua_pushstring(L, key);
+  lua_rawseti(L, -2, nameSize + 1);
+
+  lua_pop(L, 1);
+
+  lua_pushcfunction(L, &objectIndexReturn);
+
+  return 1;
 }
 
 
@@ -516,11 +536,23 @@ int objectIndexReturn( lua_State * L )
    /* Gets the method Name */
    lua_pushstring( L , LUAJAVAOBJFUNCCALLED );
    lua_rawget( L , -2 );
+
+  size_t function_name_size = lua_rawlen(L, -1);
+  // lua table index starts from 1 instead of 0
+  // get the most recently called function name
+  lua_rawgeti(L, -1, function_name_size);
+
    if ( lua_type( L , -1 ) == LUA_TNIL )
    {
       luaG_runerror(L, "Not a OO function call.");
    }
    methodName = lua_tostring( L , -1 );
+
+  lua_pop(L, 1);
+  // set function_names[last] = nil
+  // that is to pop the last function name
+  lua_pushnil(L);
+  lua_rawseti(L, -2, function_name_size);
 
    lua_pop( L , 2 );
 

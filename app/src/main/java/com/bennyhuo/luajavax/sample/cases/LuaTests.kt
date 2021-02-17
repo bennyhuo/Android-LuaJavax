@@ -55,3 +55,24 @@ fun Context.testNameConflictForFieldAndMethod() {
         """.trimIndent())
     }
 }
+
+fun Context.testNestedJavaMethodCall() {
+    class NestedMethodCall {
+
+        fun a() = "NestedMethodCall.a()"
+
+        fun b(value: String) {
+            logger.debug(value)
+        }
+    }
+
+    LuaFactory.createPlainLua(this).use { lua ->
+        lua["logger"] = logger
+        lua["nestedMethodCall"] = NestedMethodCall() // set global value
+        // Use a table to hold the nested called method names instead of a string to fix this.
+        // This would lead to a 'Invalid method call. No such method.' error before.
+        lua.runText("""
+            nestedMethodCall:b(nestedMethodCall:a())
+        """.trimIndent())
+    }
+}

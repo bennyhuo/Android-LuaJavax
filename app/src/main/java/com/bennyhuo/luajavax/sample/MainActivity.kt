@@ -2,10 +2,7 @@ package com.bennyhuo.luajavax.sample
 
 import android.app.Activity
 import android.os.Bundle
-import com.bennyhuo.luajavax.LuaFactory
-import com.bennyhuo.luajavax.sample.cases.basic
-import com.bennyhuo.luajavax.sample.cases.testErrorMessageForJavaMethodCall
-import com.bennyhuo.luajavax.sample.cases.testNameConflictForFieldAndMethod
+import com.bennyhuo.luajavax.sample.cases.testNestedJavaMethodCall
 import kotlinx.android.synthetic.main.activity_main.*
 import org.slf4j.LoggerFactory
 
@@ -24,7 +21,8 @@ class MainActivity : Activity() {
         runLua.setOnClickListener {
             // basic()
             // testErrorMessageForJavaMethodCall()
-            testNameConflictForFieldAndMethod()
+            // testNameConflictForFieldAndMethod()
+            testNestedJavaMethodCall()
         }
     }
 }
