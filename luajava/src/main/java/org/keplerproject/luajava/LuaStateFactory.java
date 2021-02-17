@@ -124,7 +124,7 @@ public final class LuaStateFactory {
 	 * @param idx
 	 */
 	public synchronized static void removeLuaState(int idx) {
-		states.add(idx, null);
+		states.set(idx, null);
 	}
 
 	/**
