@@ -7,7 +7,8 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "luajava.h"
-
+#include "lopcodes.h"
+#include "lapi.h"
 #include "ldebug.h"
 
 
@@ -389,51 +390,62 @@ int objectIndex( lua_State * L )
 
    obj = ( jobject * ) lua_touserdata( L , 1 );
 
-   method = ( *javaEnv )->GetStaticMethodID( javaEnv , luajava_api_class , "checkField" ,
-                                             "(ILjava/lang/Object;Ljava/lang/String;)I" );
+   CallInfo* prevCi = L->ci->previous;
+   if(prevCi){
+      const Instruction *pc = prevCi->u.l.savedpc - 1;
+      if(pc){
+         // code like 'a.b' is compiled to instruction OP_GETTABLE
+         // while an OO function call like 'a:b()' is compiled to OP_SELF/OP_CALL
+         if(GET_OPCODE(*pc) == OP_GETTABLE){
+            method = ( *javaEnv )->GetStaticMethodID( javaEnv , luajava_api_class , "checkField" ,
+                                                      "(ILjava/lang/Object;Ljava/lang/String;)I" );
 
-   str = ( *javaEnv )->NewStringUTF( javaEnv , key );
+            str = ( *javaEnv )->NewStringUTF( javaEnv , key );
 
-   checkField = ( *javaEnv )->CallStaticIntMethod( javaEnv , luajava_api_class , method ,
-                                                   (jint)stateIndex , *obj , str );
+            checkField = ( *javaEnv )->CallStaticIntMethod( javaEnv , luajava_api_class , method ,
+                                                            (jint)stateIndex , *obj , str );
 
-   exp = ( *javaEnv )->ExceptionOccurred( javaEnv );
+            exp = ( *javaEnv )->ExceptionOccurred( javaEnv );
 
-   /* Handles exception */
-   if ( exp != NULL )
-   {
-      jobject jstr;
-      const char * cStr;
+            /* Handles exception */
+            if ( exp != NULL )
+            {
+               jobject jstr;
+               const char * cStr;
 
-      ( *javaEnv )->ExceptionClear( javaEnv );
-      jstr = ( *javaEnv )->CallObjectMethod( javaEnv , exp , get_message_method );
+               ( *javaEnv )->ExceptionClear( javaEnv );
+               jstr = ( *javaEnv )->CallObjectMethod( javaEnv , exp , get_message_method );
 
-      ( *javaEnv )->DeleteLocalRef( javaEnv , str );
+               ( *javaEnv )->DeleteLocalRef( javaEnv , str );
 
-      if ( jstr == NULL )
-      {
-         jmethodID methodId;
+               if ( jstr == NULL )
+               {
+                  jmethodID methodId;
 
-         methodId = ( *javaEnv )->GetMethodID( javaEnv , throwable_class , "toString" , "()Ljava/lang/String;" );
-         jstr = ( *javaEnv )->CallObjectMethod( javaEnv , exp , methodId );
+                  methodId = ( *javaEnv )->GetMethodID( javaEnv , throwable_class , "toString" , "()Ljava/lang/String;" );
+                  jstr = ( *javaEnv )->CallObjectMethod( javaEnv , exp , methodId );
+               }
+
+               cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
+
+               lua_pushstring( L , cStr );
+
+               ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
+
+               lua_error( L );
+            }
+
+            ( *javaEnv )->DeleteLocalRef( javaEnv , str );
+
+            if ( checkField != 0 )
+            {
+               return checkField;
+            }
+         }
       }
-
-      cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
-
-      lua_pushstring( L , cStr );
-
-      ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
-
-      lua_error( L );
    }
 
-   ( *javaEnv )->DeleteLocalRef( javaEnv , str );
-
-   if ( checkField != 0 )
-   {
-      return checkField;
-   }
-
+   // It's an OO function call.
    lua_getmetatable( L , 1 );
 
    if ( !lua_istable( L , -1 ) )

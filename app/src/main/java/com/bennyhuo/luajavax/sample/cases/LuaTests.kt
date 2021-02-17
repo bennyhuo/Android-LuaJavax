@@ -33,3 +33,25 @@ fun Context.testErrorMessageForJavaMethodCall() {
 
     }
 }
+
+fun Context.testNameConflictForFieldAndMethod() {
+    class NameConflict {
+        @JvmField
+        var a = "NameConflict.a"
+
+        fun a() {
+            logger.debug("NameConflict.a() called.")
+        }
+    }
+
+    LuaFactory.createPlainLua(this).use { lua ->
+        lua["logger"] = logger
+        lua["nameConflict"] = NameConflict() // set global value
+        // 'nameConflict.a' will be treated as a function call before.
+        // This is fixed by checking the Lua instruction for OP_GET_TABLE.
+        lua.runText("""
+            logger:debug(nameConflict.a)
+            nameConflict:a()
+        """.trimIndent())
+    }
+}

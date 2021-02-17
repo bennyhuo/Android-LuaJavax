@@ -5,6 +5,7 @@ import android.os.Bundle
 import com.bennyhuo.luajavax.LuaFactory
 import com.bennyhuo.luajavax.sample.cases.basic
 import com.bennyhuo.luajavax.sample.cases.testErrorMessageForJavaMethodCall
+import com.bennyhuo.luajavax.sample.cases.testNameConflictForFieldAndMethod
 import kotlinx.android.synthetic.main.activity_main.*
 import org.slf4j.LoggerFactory
 
@@ -21,8 +22,9 @@ class MainActivity : Activity() {
         setContentView(R.layout.activity_main)
 
         runLua.setOnClickListener {
-            //basic()
-            testErrorMessageForJavaMethodCall()
+            // basic()
+            // testErrorMessageForJavaMethodCall()
+            testNameConflictForFieldAndMethod()
         }
     }
 }
