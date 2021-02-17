@@ -1,1 +1,1 @@
-include ':app',':luajava'
+include ':app',':luajava', ':luajavax'

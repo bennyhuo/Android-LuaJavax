@@ -33,7 +33,7 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    implementation project(':luajava')
+    implementation project(':luajavax')
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     api 'org.slf4j:slf4j-api:1.7.21'
