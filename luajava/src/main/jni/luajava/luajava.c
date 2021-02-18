@@ -777,22 +777,20 @@ int javaBindClass( lua_State * L )
 
    if ( top != 1 )
    {
-      luaL_error( L , "Error. Function javaBindClass received %d arguments, expected 1." , top );
+      luaG_runerror( L , "Error. Function javaBindClass received %d arguments, expected 1." , top );
    }
 
    /* Gets the JNI Environment */
    javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid JNI Environment." );
    }
 
    /* get the string parameter */
    if ( !lua_isstring( L , 1 ) )
    {
-      lua_pushstring( L , "Invalid parameter type. String expected." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid parameter type. String expected." );
    }
    className = lua_tostring( L , 1 );
 
