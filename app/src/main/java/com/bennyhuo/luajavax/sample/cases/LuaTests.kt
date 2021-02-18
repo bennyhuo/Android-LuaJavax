@@ -76,3 +76,20 @@ fun Context.testNestedJavaMethodCall() {
         """.trimIndent())
     }
 }
+
+fun Context.testBindClass() {
+    LuaFactory.createPlainLua(this).use { lua ->
+        lua["logger"] = logger
+        lua["StringClass"] = String::class.java
+        // Use a table to hold the nested called method names instead of a string to fix this.
+        // This would lead to a 'Invalid method call. No such method.' error before.
+        lua.runText("""
+            logger:debug("{}", StringClass)
+            StringClass1 = luajava.bindClass("java.lang.String")
+            logger:debug("{}", StringClass1)
+            
+            logger:debug(StringClass:format("%d.%d.%d.%d",1, 2, 3, 4))
+            logger:debug(StringClass1:format("%d.%d.%d.%d",4, 3, 2, 1))
+        """.trimIndent())
+    }
+}

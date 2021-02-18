@@ -2,6 +2,7 @@ package com.bennyhuo.luajavax.sample
 
 import android.app.Activity
 import android.os.Bundle
+import com.bennyhuo.luajavax.sample.cases.testBindClass
 import com.bennyhuo.luajavax.sample.cases.testNestedJavaMethodCall
 import kotlinx.android.synthetic.main.activity_main.*
 import org.slf4j.LoggerFactory
@@ -22,7 +23,8 @@ class MainActivity : Activity() {
             // basic()
             // testErrorMessageForJavaMethodCall()
             // testNameConflictForFieldAndMethod()
-            testNestedJavaMethodCall()
+            // testNestedJavaMethodCall()
+            testBindClass()
         }
     }
 }

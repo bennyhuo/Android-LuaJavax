@@ -58,7 +58,7 @@ public final class LuaJavaAPI
     {
       int top = L.getTop();
 
-      Object[] objs = new Object[top - 1];
+      Object[] parameterValues = new Object[top - 1];
 
       Class clazz;
 
@@ -78,26 +78,48 @@ public final class LuaJavaAPI
       for (int i = 0; i < methods.length; i++)
       {
         if (!methods[i].getName().equals(methodName))
-
           continue;
 
         Class[] parameters = methods[i].getParameterTypes();
-        if (parameters.length != top - 1)
+        boolean isVarArgs = methods[i].isVarArgs();
+        if (!isVarArgs && parameters.length != top - 1
+                || isVarArgs && parameters.length - 1 > top - 1) {
           continue;
+        }
 
         boolean okMethod = true;
 
-        for (int j = 0; j < parameters.length; j++)
+        int nonVarargParameterLength = parameters.length - (isVarArgs ? 1 : 0);
+        for (int j = 0; j < nonVarargParameterLength; j++)
         {
           try
           {
-            objs[j] = compareTypes(L, parameters[j], j + 2);
+            parameterValues[j] = compareTypes(L, parameters[j], j + 2);
           }
           catch (Exception e)
           {
             okMethod = false;
             break;
           }
+        }
+
+        if (isVarArgs) {
+          Class varargType = parameters[parameters.length - 1];
+          Class parameterType = varargType.getComponentType();
+
+          Object[] newParameterValues = new Object[parameters.length];
+          System.arraycopy(parameterValues, 0, newParameterValues, 0,parameters.length - 1);
+          Object[] varargParameterValues = new Object[top - parameters.length];
+          newParameterValues[newParameterValues.length - 1] = varargParameterValues;
+          for (int j = parameters.length - 1; j < top - 1; j++) {
+            try {
+              varargParameterValues[j - parameters.length + 1] = compareTypes(L, parameterType, j + 2);
+            } catch (Exception e) {
+              okMethod = false;
+              break;
+            }
+          }
+          parameterValues = newParameterValues;
         }
 
         if (okMethod)
@@ -124,11 +146,11 @@ public final class LuaJavaAPI
 
         if (obj instanceof Class)
         {
-          ret = method.invoke(null, objs);
+          ret = method.invoke(null, parameterValues);
         }
         else
         {
-          ret = method.invoke(obj, objs);
+          ret = method.invoke(obj, parameterValues);
         }
       }
       catch (Exception e)
