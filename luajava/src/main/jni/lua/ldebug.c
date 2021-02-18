@@ -221,7 +221,10 @@ static void funcinfo (lua_Debug *ar, Closure *cl) {
     ar->lastlinedefined = p->lastlinedefined;
     ar->what = (ar->linedefined == 0) ? "main" : "Lua";
   }
-  luaO_chunkid(ar->short_src, ar->source, LUA_IDSIZE, -1);
+
+  // ar->currentline may not be initialized. try to get currentline from ci.
+  int line = ar->i_ci && isLua(ar->i_ci) ? currentline(ar->i_ci) : -1;
+  luaO_chunkid(ar->short_src, ar->source, LUA_IDSIZE, line);
 }
 
 
