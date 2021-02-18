@@ -952,8 +952,7 @@ int javaNew( lua_State * L )
 
    if ( top == 0 )
    {
-      lua_pushstring( L , "Error. Invalid number of parameters." );
-      lua_error( L );
+      luaG_runerror( L , "Error. Invalid number of parameters." );
    }
 
    /* Gets the luaState index */
@@ -962,8 +961,7 @@ int javaNew( lua_State * L )
 
    if ( !lua_isnumber( L , -1 ) )
    {
-      lua_pushstring( L , "Impossible to identify luaState id." );
-      lua_error( L );
+      luaG_runerror( L , "Impossible to identify luaState id." );
    }
 
    stateIndex = lua_tonumber( L , -1 );
@@ -972,16 +970,14 @@ int javaNew( lua_State * L )
    /* Gets the java Class reference */
    if ( !isJavaObject( L , 1 ) )
    {
-      lua_pushstring( L , "Argument not a valid Java Class." );
-      lua_error( L );
+      luaG_runerror( L , "Argument not a valid Java Class." );
    }
 
    /* Gets the JNI Environment */
    javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid JNI Environment." );
    }
 
    clazz = ( *javaEnv )->FindClass( javaEnv , "java/lang/Class" );
@@ -992,20 +988,18 @@ int javaNew( lua_State * L )
 
    if ( ( *javaEnv )->IsInstanceOf( javaEnv , classInstance , clazz ) == JNI_FALSE )
    {
-      lua_pushstring( L , "Argument not a valid Java Class." );
-      lua_error( L );
+      luaG_runerror( L , "Argument not a valid Java Class." );
    }
 
    method = ( *javaEnv )->GetStaticMethodID( javaEnv , luajava_api_class , "javaNew" ,
                                              "(ILjava/lang/Class;)I" );
 
-   if ( clazz == NULL || method == NULL )
+   if ( luajava_api_class == NULL || method == NULL )
    {
-      lua_pushstring( L , "Invalid method org.keplerproject.luajava.LuaJavaAPI.javaNew." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid method org.keplerproject.luajava.LuaJavaAPI.javaNew." );
    }
 
-   ret = ( *javaEnv )->CallStaticIntMethod( javaEnv , clazz , method , (jint)stateIndex , classInstance );
+   ret = ( *javaEnv )->CallStaticIntMethod( javaEnv , luajava_api_class , method , (jint)stateIndex , classInstance );
 
    exp = ( *javaEnv )->ExceptionOccurred( javaEnv );
 
