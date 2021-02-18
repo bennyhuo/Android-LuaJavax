@@ -428,11 +428,12 @@ int objectIndex( lua_State * L )
 
                cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-               lua_pushstring( L , cStr );
+               char error_message[strlen(cStr)];
+               strcpy(error_message, cStr);
 
                ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
-               lua_error( L );
+               luaG_runerror(L, error_message);
             }
 
             ( *javaEnv )->DeleteLocalRef( javaEnv , str );
@@ -598,11 +599,12 @@ int objectIndexReturn( lua_State * L )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char error_message[strlen(cStr)];
+      strcpy(error_message, cStr);
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
-      lua_error( L );
+      luaG_runerror(L, error_message);
    }
 
    ( *javaEnv )->DeleteLocalRef( javaEnv , str );
@@ -696,11 +698,12 @@ int classIndex( lua_State * L )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char error_message[strlen(cStr)];
+      strcpy(error_message, cStr);
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
-      lua_error( L );
+      luaG_runerror(L, error_message);
    }
 
    ( *javaEnv )->DeleteLocalRef( javaEnv , str );
@@ -825,11 +828,12 @@ int javaBindClass( lua_State * L )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char error_message[strlen(cStr)];
+      strcpy(error_message, cStr);
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
-      lua_error( L );
+      luaG_runerror(L, error_message);
    }
 
    ( *javaEnv )->DeleteLocalRef( javaEnv , javaClassName );
@@ -856,8 +860,7 @@ int createProxy( lua_State * L )
 
   if ( lua_gettop( L ) != 2 )
   {
-    lua_pushstring( L , "Error. Function createProxy expects 2 arguments." );
-    lua_error( L );
+    luaG_runerror( L , "Error. Function createProxy expects 2 arguments." );
   }
 
   /* Gets the luaState index */
@@ -866,8 +869,7 @@ int createProxy( lua_State * L )
 
    if ( !lua_isnumber( L , -1 ) )
    {
-      lua_pushstring( L , "Impossible to identify luaState id." );
-      lua_error( L );
+      luaG_runerror( L , "Impossible to identify luaState id." );
    }
 
    stateIndex = lua_tonumber( L , -1 );
@@ -875,16 +877,14 @@ int createProxy( lua_State * L )
 
    if ( !lua_isstring( L , 1 ) || !lua_istable( L , 2 ) )
    {
-      lua_pushstring( L , "Invalid Argument types. Expected (string, table)." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid Argument types. Expected (string, table)." );
    }
 
    /* Gets the JNI Environment */
    javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid JNI Environment." );
    }
 
    method = ( *javaEnv )->GetStaticMethodID( javaEnv , luajava_api_class , "createProxyObject" ,
@@ -919,11 +919,12 @@ int createProxy( lua_State * L )
 
       cStr = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , cStr );
+      char error_message[strlen(cStr)];
+      strcpy(error_message, cStr);
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, cStr );
 
-      lua_error( L );
+      luaG_runerror(L, error_message);
    }
 
    ( *javaEnv )->DeleteLocalRef( javaEnv , str );
@@ -1022,11 +1023,12 @@ int javaNew( lua_State * L )
 
       str = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , str );
+      char error_message[strlen(str)];
+      strcpy(error_message, str);
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, str );
 
-      lua_error( L );
+      luaG_runerror(L, error_message);
    }
   return ret;
 }
@@ -1053,8 +1055,7 @@ int javaNewInstance( lua_State * L )
 
    if ( !lua_isnumber( L , -1 ) )
    {
-      lua_pushstring( L , "Impossible to identify luaState id." );
-      lua_error( L );
+      luaG_runerror( L , "Impossible to identify luaState id." );
    }
 
    stateIndex = lua_tonumber( L , -1 );
@@ -1063,8 +1064,7 @@ int javaNewInstance( lua_State * L )
    /* get the string parameter */
    if ( !lua_isstring( L , 1 ) )
    {
-      lua_pushstring( L , "Invalid parameter type. String expected as first parameter." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid parameter type. String expected as first parameter." );
    }
 
    className = lua_tostring( L , 1 );
@@ -1073,8 +1073,7 @@ int javaNewInstance( lua_State * L )
    javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid JNI Environment." );
    }
 
    method = ( *javaEnv )->GetStaticMethodID( javaEnv , luajava_api_class , "javaNewInstance" ,
@@ -1108,11 +1107,12 @@ int javaNewInstance( lua_State * L )
 
       str = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , str );
+      char error_message[strlen(str)];
+      strcpy(error_message, str);
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, str );
 
-      lua_error( L );
+      luaG_runerror(L, error_message);
    }
 
    ( *javaEnv )->DeleteLocalRef( javaEnv , javaClassName );
@@ -1141,8 +1141,7 @@ int javaLoadLib( lua_State * L )
 
    if ( top != 2 )
    {
-      lua_pushstring( L , "Error. Invalid number of parameters." );
-      lua_error( L );
+      luaG_runerror( L , "Error. Invalid number of parameters." );
    }
 
    /* Gets the luaState index */
@@ -1151,8 +1150,7 @@ int javaLoadLib( lua_State * L )
 
    if ( !lua_isnumber( L , -1 ) )
    {
-      lua_pushstring( L , "Impossible to identify luaState id." );
-      lua_error( L );
+      luaG_runerror( L , "Impossible to identify luaState id." );
    }
 
    stateIndex = lua_tonumber( L , -1 );
@@ -1161,8 +1159,7 @@ int javaLoadLib( lua_State * L )
 
    if ( !lua_isstring( L , 1 ) || !lua_isstring( L , 2 ) )
    {
-      lua_pushstring( L , "Invalid parameter. Strings expected." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid parameter. Strings expected." );
    }
 
    className  = lua_tostring( L , 1 );
@@ -1172,8 +1169,7 @@ int javaLoadLib( lua_State * L )
    javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid JNI Environment." );
    }
 
    method = ( *javaEnv )->GetStaticMethodID( javaEnv , luajava_api_class , "javaLoadLib" ,
@@ -1209,11 +1205,12 @@ int javaLoadLib( lua_State * L )
 
       str = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , str );
+      char error_message[strlen(str)];
+      strcpy(error_message, str);
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, str );
 
-      lua_error( L );
+      luaG_runerror(L, error_message);
    }
 
    ( *javaEnv )->DeleteLocalRef( javaEnv , javaClassName );
@@ -1236,8 +1233,7 @@ int pushJavaClass( lua_State * L , jobject javaObject )
    JNIEnv * javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid JNI Environment." );
    }
 
    globalRef = ( *javaEnv )->NewGlobalRef( javaEnv , javaObject );
@@ -1266,8 +1262,7 @@ int pushJavaClass( lua_State * L , jobject javaObject )
 
    if ( lua_setmetatable( L , -2 ) == 0 )
    {
-      lua_pushstring( L , "Cannot create proxy to java class." );
-      lua_error( L );
+      luaG_runerror( L , "Cannot create proxy to java class." );
    }
 
    return 1;
@@ -1287,8 +1282,7 @@ int pushJavaObject( lua_State * L , jobject javaObject )
    JNIEnv * javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid JNI Environment." );
    }
 
    globalRef = ( *javaEnv )->NewGlobalRef( javaEnv , javaObject );
@@ -1316,8 +1310,7 @@ int pushJavaObject( lua_State * L , jobject javaObject )
 
    if ( lua_setmetatable( L , -2 ) == 0 )
    {
-      lua_pushstring( L , "Cannot create proxy to java object." );
-      lua_error( L );
+      luaG_runerror( L , "Cannot create proxy to java object." );
    }
 
    return 1;
@@ -1385,8 +1378,7 @@ int luaJavaFunctionCall( lua_State * L )
 
    if ( !isJavaObject( L , 1 ) )
    {
-      lua_pushstring( L , "Not a java Function." );
-      lua_error( L );
+      luaG_runerror( L , "Not a java Function." );
    }
 
    obj = lua_touserdata( L , 1 );
@@ -1395,8 +1387,7 @@ int luaJavaFunctionCall( lua_State * L )
    javaEnv = getEnvFromState( L );
    if ( javaEnv == NULL )
    {
-      lua_pushstring( L , "Invalid JNI Environment." );
-      lua_error( L );
+      luaG_runerror( L , "Invalid JNI Environment." );
    }
 
    /* the Object must be an instance of the JavaFunction class */
@@ -1430,11 +1421,12 @@ int luaJavaFunctionCall( lua_State * L )
 
       str = ( *javaEnv )->GetStringUTFChars( javaEnv , jstr , NULL );
 
-      lua_pushstring( L , str );
+      char error_message[strlen(str)];
+      strcpy(error_message, str);
 
       ( *javaEnv )->ReleaseStringUTFChars( javaEnv , jstr, str );
 
-      lua_error( L );
+      luaG_runerror(L, error_message);
    }
    return ret;
 }
