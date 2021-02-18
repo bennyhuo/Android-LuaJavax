@@ -1258,7 +1258,8 @@ int pushJavaClass( lua_State * L , jobject javaObject )
 
    /* pushes the __index metamethod */
    lua_pushstring( L , LUAINDEXMETAMETHODTAG );
-   lua_pushcfunction( L , &classIndex );
+   //No differences between Java classes and Java objects. A Java class is also a Java object.
+   lua_pushcfunction( L , &objectIndex );
    lua_rawset( L , -3 );
 
    /* pushes the __gc metamethod */
