@@ -3,6 +3,7 @@ package com.bennyhuo.luajavax.sample
 import android.app.Activity
 import android.os.Bundle
 import com.bennyhuo.luajavax.sample.cases.testBindClass
+import com.bennyhuo.luajavax.sample.cases.testJavaMethodNotFound
 import com.bennyhuo.luajavax.sample.cases.testJavaNew
 import com.bennyhuo.luajavax.sample.cases.testNestedJavaMethodCall
 import kotlinx.android.synthetic.main.activity_main.*
@@ -26,7 +27,8 @@ class MainActivity : Activity() {
             // testNameConflictForFieldAndMethod()
             // testNestedJavaMethodCall()
             // testBindClass()
-            testJavaNew()
+            // testJavaNew()
+            testJavaMethodNotFound()
         }
     }
 }

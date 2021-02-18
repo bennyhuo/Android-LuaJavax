@@ -7,6 +7,6 @@ import com.bennyhuo.luajavax.core.Lua
 object LuaFactory {
 
     @JvmStatic
-    fun createPlainLua(context: Context): ILua = Lua(context)
+    fun createLua(context: Context): ILua = Lua(context)
 
 }

@@ -7,7 +7,7 @@ import com.bennyhuo.luajavax.sample.logger
 
 
 fun Context.basic() {
-    LuaFactory.createPlainLua(this).use { lua ->
+    LuaFactory.createLua(this).use { lua ->
         lua["logger"] = logger
         lua["BuildConfig"] = BuildConfig::class.java // set global value
         // run script, access to Java class
@@ -18,7 +18,7 @@ fun Context.basic() {
 }
 
 fun Context.testErrorMessageForJavaMethodCall() {
-    LuaFactory.createPlainLua(this).use { lua ->
+    LuaFactory.createLua(this).use { lua ->
         lua["logger"] = logger
         lua["BuildConfig"] = BuildConfig::class.java // set global value
         // 'logger.debug' is an invalid function call in lua.
@@ -44,7 +44,7 @@ fun Context.testNameConflictForFieldAndMethod() {
         }
     }
 
-    LuaFactory.createPlainLua(this).use { lua ->
+    LuaFactory.createLua(this).use { lua ->
         lua["logger"] = logger
         lua["nameConflict"] = NameConflict() // set global value
         // 'nameConflict.a' will be treated as a function call before.
@@ -66,7 +66,7 @@ fun Context.testNestedJavaMethodCall() {
         }
     }
 
-    LuaFactory.createPlainLua(this).use { lua ->
+    LuaFactory.createLua(this).use { lua ->
         lua["logger"] = logger
         lua["nestedMethodCall"] = NestedMethodCall() // set global value
         // Use a table to hold the nested called method names instead of a string to fix this.
@@ -78,7 +78,7 @@ fun Context.testNestedJavaMethodCall() {
 }
 
 fun Context.testBindClass() {
-    LuaFactory.createPlainLua(this).use { lua ->
+    LuaFactory.createLua(this).use { lua ->
         lua["logger"] = logger
         lua["StringClass"] = String::class.java
         // Use a table to hold the nested called method names instead of a string to fix this.
@@ -101,7 +101,7 @@ fun Context.testJavaNew() {
         }
     }
 
-    LuaFactory.createPlainLua(this).use { lua ->
+    LuaFactory.createLua(this).use { lua ->
         lua["logger"] = logger
         lua["TestJavaNew"] = TestJavaNew::class.java
         // Use a table to hold the nested called method names instead of a string to fix this.
@@ -109,6 +109,25 @@ fun Context.testJavaNew() {
         lua.runText("""
             testJavaNew = luajava.new(TestJavaNew)
             testJavaNew:sayHello()
+        """.trimIndent())
+    }
+}
+
+fun Context.testJavaMethodNotFound() {
+    class JavaMethodNotFound {
+        fun sayHello() {
+            logger.debug("Hello.")
+        }
+    }
+
+    LuaFactory.createLua(this).use { lua ->
+        lua["logger"] = logger
+        lua["javaMethodNotFound"] = JavaMethodNotFound()
+        // Use a table to hold the nested called method names instead of a string to fix this.
+        // This would lead to a 'Invalid method call. No such method.' error before.
+        lua.runText("""
+            javaMethodNotFound:sayHello()
+            javaMethodNotFound:sayHell()
         """.trimIndent())
     }
 }
