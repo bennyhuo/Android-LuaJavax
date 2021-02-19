@@ -131,3 +131,17 @@ fun Context.testJavaMethodNotFound() {
         """.trimIndent())
     }
 }
+
+fun Context.testLuaStdio() {
+    LuaFactory.createLua(this).use { lua ->
+        // redirect 'print' and 'print_error' to logcat.
+        // It take no effects on 'io.write' or 'io.stdout.write' or 'io.stderr.write'.
+        lua.redirectStdioToLogcat()
+        lua.runText("""
+            print("see this in logcat info")
+            print_error("see this in logcat warn")
+            io.write("this won't work")
+            io.stderr:write("this won't work")
+        """.trimIndent())
+    }
+}

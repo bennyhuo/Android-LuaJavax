@@ -15,12 +15,16 @@ class DummyLua : ILua {
         return false
     }
 
-    override fun setOutput(outputFile: File): Boolean {
+    override fun redirectStdoutToFile(outputFile: File): Boolean {
         this.outputFile = outputFile
         return true
     }
 
-    override fun set(name: String, value: Any): Boolean = printTips()
+    override fun redirectStdioToLogcat(): Boolean {
+        return true
+    }
+
+    override fun set(name: String, value: Any?): Boolean = printTips()
 
     override fun runText(luaScriptText: String): Boolean = printTips()
 

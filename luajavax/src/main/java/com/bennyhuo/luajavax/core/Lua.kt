@@ -1,6 +1,7 @@
 package com.bennyhuo.luajavax.core
 
 import android.content.Context
+import com.bennyhuo.luajavax.log.AndroidLog
 import org.keplerproject.luajava.LuaException
 import org.keplerproject.luajava.LuaState
 import org.keplerproject.luajava.LuaStateFactory
@@ -29,6 +30,7 @@ internal class Lua(context: Context) : ILua {
         luaState = state
         if (luaState != null) {
             this["applicationContext"] = context.applicationContext
+            runText("print_error = print")
         }
     }
 
@@ -48,16 +50,37 @@ internal class Lua(context: Context) : ILua {
         logger.debug("run lua, result: $it")
     }
 
-    override fun setOutput(outputFile: File) = tryWithState {
-        set("path", outputFile.path) and runText("newOutput(path)")
+    override fun redirectStdoutToFile(outputFile: File) = tryWithState {
+        set("path", outputFile.path) and runText("""
+            print = function(...)
+                io.write(table.concat({ os.date("[%Y-%m-%d %H:%M:%S]"), ... }, "\t"))
+                io.flush()
+            end
+            print_error = print
+            io.output(path)
+        """.trimIndent())
     }.also {
         this@Lua.outputFile = outputFile
+    }
+
+    override fun redirectStdioToLogcat(): Boolean = tryWithState {
+        set("luajava_stdout", AndroidLog.stdout) and
+                set("luajava_stderr", AndroidLog.stderr) and
+                runText("""
+                    print = function(...)
+                        luajava_stdout:println(table.concat({ ... }, " "))
+                    end
+                    
+                    print_error = function(...)
+                        luajava_stderr:println(table.concat({ ... }, " "))
+                    end
+                """.trimIndent())
     }
 
     /**
      * 添加 Lua 全局变量
      */
-    override operator fun set(name: String, value: Any) = tryWithState {
+    override operator fun set(name: String, value: Any?) = tryWithState {
         logger.debug("setGlobal: $name=$value")
         pushObjectValue(value)
         setGlobal(name)

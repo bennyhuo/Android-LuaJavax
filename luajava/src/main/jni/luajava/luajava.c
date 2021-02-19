@@ -3284,26 +3284,25 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
   JNIEnv* env = NULL;
 
   jint result = -1;
-  LOGI(8, "start load")
+  LOG_INFO("start load");
   if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK)
   {
-      LOGW(1, "get env failed")
+      LOG_ERROR("get env failed");
       return JNI_ERR;
   }
   jclass cls = (*env)->FindClass(env, LUASTATE_CLASS);
   if (cls == NULL)
   {
-      LOGW(1, "get class failed")
+      LOG_ERROR("get class failed");
       return JNI_ERR;
   }
 
   int len = sizeof(jni_methods) / sizeof(jni_methods[0]);
-  LOGW(1, "methods len:%d", len)
   if ((*env)->RegisterNatives(env, cls, jni_methods, len) < 0)
   {
-      LOGW(1, "register method failed")
+      LOG_ERROR("register method failed");
       return JNI_ERR;
   }
-  LOGI(8, "load success")
+  LOG_INFO("load success");
   return JNI_VERSION_1_4;
 }
