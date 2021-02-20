@@ -15,6 +15,22 @@ I will deploy the modules of 'luajava' and 'luajavax' to MavenCentra later.
 
 You can clone this project, and simply copy-paste the two modules into your project for the moment.
 
+### SNAPSHOT
+
+If you want to try the dev version, add this to your build.gradle:
+
+```
+repositories {
+    maven {
+        url "https://oss.sonatype.org/service/local/repositories/snapshots/" 
+    }
+}
+
+dependencies {
+    implementation "com.bennyhuo.luajavax:1.0-SNAPSHOT"
+}
+```
+
 ## API
 
 You can create a Lua state machine via `LuaFactory`:
