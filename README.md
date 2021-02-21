@@ -48,15 +48,25 @@ The ILua is what you need to execute Lua scripts.
 
 ```kotlin
 interface ILua : Closeable {
-    fun setOutput(outputFile: File): Boolean
-    operator fun set(name: String, value: Any): Boolean
+
+    fun redirectStdoutToFile(outputFile: File): Boolean
+    fun redirectStdioToLogcat(): Boolean
+
+    operator fun set(name: String, value: Any?): Boolean
+    operator fun <T> get(name: String): T?
+    fun getInt(name: String): Int?
+    fun getDouble(name: String): Double?
+    fun getString(name: String): String?
+    fun getBoolean(name: String): Boolean?
+
     fun runText(luaScriptText: String): Boolean
     fun runFile(luaScriptFile: File): Boolean
     fun runStream(luaScriptStream: InputStream): Boolean
     fun runScriptInAssets(scriptPath: String): Boolean
+
     override fun close()
     fun finalize()
-}
+}}
 ```
 
 You can run Lua scripts from string/file/assets directly. It is easy to access Java class and objects.
@@ -75,6 +85,22 @@ You can redirect stdout to any file you want:
 
 ```kotlin
 lua.setOutput(File(getExternalFilesDir("lua_output"), "hello_world.lua.output")
+```
+
+The default behavior of Lua function `print` is to write content to the stdout, which does not work in Logcat. So you can use `redirectStdioToLogcat` to redirect `print` to Logcat with a Tag 'luajavax':
+
+```kotlin
+LuaFactory.createLua(this).use { lua ->
+    // redirect 'print' and 'print_error' to logcat.
+    // It take no effects on 'io.write' or 'io.stdout.write' or 'io.stderr.write'.
+    lua.redirectStdioToLogcat()
+    lua.runText("""
+        print("see this in logcat info")
+        print_error("see this in logcat warn")
+        io.write("this won't work")
+        io.stderr:write("this won't work")
+    """.trimIndent())
+}
 ```
 
 The Lua state machine will be closed after use block. If you want to hold a global instance, you can:
