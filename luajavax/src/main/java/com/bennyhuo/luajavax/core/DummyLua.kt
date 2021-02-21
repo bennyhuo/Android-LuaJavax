@@ -25,6 +25,25 @@ class DummyLua : ILua {
     }
 
     override fun set(name: String, value: Any?): Boolean = printTips()
+    override fun <T> get(name: String): T? {
+        return null
+    }
+
+    override fun getInt(name: String): Int? {
+        return null
+    }
+
+    override fun getDouble(name: String): Double? {
+        return null
+    }
+
+    override fun getString(name: String): String? {
+        return null
+    }
+
+    override fun getBoolean(name: String): Boolean? {
+        return null
+    }
 
     override fun runText(luaScriptText: String): Boolean = printTips()
 

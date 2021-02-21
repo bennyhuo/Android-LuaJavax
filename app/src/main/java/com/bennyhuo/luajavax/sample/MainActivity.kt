@@ -26,7 +26,8 @@ class MainActivity : Activity() {
             // testBindClass()
             // testJavaNew()
             // testJavaMethodNotFound()
-            testLuaStdio()
+            // testLuaStdio()
+            testValues()
         }
     }
 }

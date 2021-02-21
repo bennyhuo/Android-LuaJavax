@@ -4,6 +4,7 @@ import android.content.Context
 import com.bennyhuo.luajavax.LuaFactory
 import com.bennyhuo.luajavax.sample.BuildConfig
 import com.bennyhuo.luajavax.sample.logger
+import org.slf4j.Logger
 
 
 fun Context.basic() {
@@ -123,8 +124,7 @@ fun Context.testJavaMethodNotFound() {
     LuaFactory.createLua(this).use { lua ->
         lua["logger"] = logger
         lua["javaMethodNotFound"] = JavaMethodNotFound()
-        // Use a table to hold the nested called method names instead of a string to fix this.
-        // This would lead to a 'Invalid method call. No such method.' error before.
+        // cannot find method 'sayHell' and threw exception from LuaJavaAPI, no line info before.
         lua.runText("""
             javaMethodNotFound:sayHello()
             javaMethodNotFound:sayHell()
@@ -143,5 +143,33 @@ fun Context.testLuaStdio() {
             io.write("this won't work")
             io.stderr:write("this won't work")
         """.trimIndent())
+    }
+}
+
+fun Context.testValues() {
+    LuaFactory.createLua(this).use { lua ->
+        lua["logger"] = logger
+        lua["StringClass"] = String::class.java
+        // redirect 'print' and 'print_error' to logcat.
+        // It take no effects on 'io.write' or 'io.stdout.write' or 'io.stderr.write'.
+        lua.redirectStdioToLogcat()
+        lua.runText("""
+            n = 2.0
+            i = 3
+            s = "hello"
+            x = nil
+        """.trimIndent())
+
+        val loggerFromLua = lua.get<Logger>("logger")
+        loggerFromLua?.debug("I got a logger from lua!")
+        val stringClass: Class<String>? = lua["StringClass"]
+        loggerFromLua?.warn("And a $stringClass")
+
+        val n = lua.getDouble("n")
+        val i = lua.getInt("i")
+        val s = lua.getString("s")
+        val x = lua.getString("x")
+
+        loggerFromLua?.info("Others: n = $n, i = $i, s = $s, x = $x")
     }
 }

@@ -87,6 +87,46 @@ internal class Lua(context: Context) : ILua {
         true
     }
 
+    override fun <T> get(name: String): T? {
+        return try {
+            luaState?.run {
+                getGlobal(name)
+                when {
+                    isNoneOrNil(-1) -> null
+                    isBoolean(-1) -> toBoolean(-1)
+                    isNumber(-1) -> toNumber(-1)
+                    // Lua treats number as string too. So test number before string.
+                    isString(-1) -> toString(-1)
+                    isObject(-1) -> toJavaObject(-1)
+                    else -> throw LuaException("Unsupported type of key: $name")
+                }
+            }
+        } catch (e: Exception) {
+            logger.warn("lua error", e)
+            outputFile?.writer()?.let(::PrintWriter)?.use {
+                it.write("[${Date()}] Error when run lua.\n")
+                e.printStackTrace(it)
+            }
+            null
+        } as T?
+    }
+
+    override fun getInt(name: String): Int? {
+        return get<Number>(name)?.toInt()
+    }
+
+    override fun getDouble(name: String): Double? {
+        return get<Double>(name)
+    }
+
+    override fun getString(name: String): String? {
+        return get<String>(name)
+    }
+
+    override fun getBoolean(name: String): Boolean? {
+        return get<Boolean>(name)
+    }
+
     override fun runText(luaScriptText: String) = tryWithState {
         logger.debug(luaScriptText)
         LdoString(luaScriptText) == 0
