@@ -11,9 +11,11 @@
 
 ## Import
 
-I will deploy the modules of 'luajava' and 'luajavax' to MavenCentra later.
-
-You can clone this project, and simply copy-paste the two modules into your project for the moment.
+I have deployed these modules to maven central, you may add this in your build.gradle: 
+ 
+```
+implementation("com.bennyhuo.luajavax:1.0")
+```
 
 ### SNAPSHOT
 
@@ -27,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    implementation "com.bennyhuo.luajavax:1.0-SNAPSHOT"
+    implementation("com.bennyhuo.luajavax:1.0-SNAPSHOT")
 }
 ```
 
@@ -44,30 +46,7 @@ object LuaFactory {
 }
 ```
 
-The ILua is what you need to execute Lua scripts.
-
-```kotlin
-interface ILua : Closeable {
-
-    fun redirectStdoutToFile(outputFile: File): Boolean
-    fun redirectStdioToLogcat(): Boolean
-
-    operator fun set(name: String, value: Any?): Boolean
-    operator fun <T> get(name: String): T?
-    fun getInt(name: String): Int?
-    fun getDouble(name: String): Double?
-    fun getString(name: String): String?
-    fun getBoolean(name: String): Boolean?
-
-    fun runText(luaScriptText: String): Boolean
-    fun runFile(luaScriptFile: File): Boolean
-    fun runStream(luaScriptStream: InputStream): Boolean
-    fun runScriptInAssets(scriptPath: String): Boolean
-
-    override fun close()
-    fun finalize()
-}}
-```
+The `ILua` instance is what you need to execute Lua scripts. See its APIs here: [ILua](luajavax/src/main/java/com/bennyhuo/luajavax/core/ILua.kt).
 
 You can run Lua scripts from string/file/assets directly. It is easy to access Java class and objects.
 
