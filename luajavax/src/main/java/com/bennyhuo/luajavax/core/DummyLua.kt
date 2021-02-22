@@ -15,6 +15,8 @@ class DummyLua : ILua {
         return false
     }
 
+    override val isClosed: Boolean = true
+
     override fun redirectStdoutToFile(outputFile: File): Boolean {
         this.outputFile = outputFile
         return true

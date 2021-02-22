@@ -13,24 +13,23 @@ import java.util.*
 
 internal class Lua(context: Context) : ILua {
 
-    private val logger = LoggerFactory.getLogger(Lua::class.java)
+    private val logger = LoggerFactory.getLogger("luajavax")
 
     private var luaState: LuaState? = null
     private var outputFile: File? = null
 
+    override val isClosed: Boolean
+        get() = luaState?.isClosed ?: true
+
     init {
-        var state: LuaState? = null
         try {
-            state = LuaStateFactory.newLuaState()
-            state!!.openLibs()
+            this.luaState = LuaStateFactory.newLuaState()?.also { luaState ->
+                luaState.openLibs()
+                this["applicationContext"] = context.applicationContext
+                runText("print_error = print")
+            }
         } catch (e: Exception) {
             logger.warn("Init Lua with Error", e)
-        }
-
-        luaState = state
-        if (luaState != null) {
-            this["applicationContext"] = context.applicationContext
-            runText("print_error = print")
         }
     }
 
@@ -148,9 +147,9 @@ internal class Lua(context: Context) : ILua {
 
     override fun close() {
         try {
-            if (luaState?.isClosed == false) {
-                luaState?.close()
-            }
+            val luaState = this.luaState
+            luaState?.takeUnless { it.isClosed }?.close()
+            this.luaState = null
         } catch (e: Exception) {
             logger.warn("Destroy Lua with Error", e)
         }

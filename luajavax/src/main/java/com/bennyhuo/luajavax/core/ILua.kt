@@ -6,6 +6,8 @@ import java.io.InputStream
 
 interface ILua : Closeable {
 
+    val isClosed: Boolean
+
     fun redirectStdoutToFile(outputFile: File): Boolean
     fun redirectStdioToLogcat(): Boolean
 
