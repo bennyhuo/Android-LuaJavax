@@ -25,16 +25,17 @@ internal class Lua(context: Context) : ILua {
         try {
             this.luaState = LuaStateFactory.newLuaState()?.also { luaState ->
                 luaState.openLibs()
-                this["applicationContext"] = context.applicationContext
-                runText("print_error = print")
             }
+
+            this["applicationContext"] = context.applicationContext
+            runText("print_error = print")
         } catch (e: Exception) {
             logger.warn("Init Lua with Error", e)
         }
     }
 
-    private inline fun tryWithState(block: LuaState.() -> Boolean) = try {
-        if (!luaState!!.run(block)) {
+    private fun tryWithState(block: LuaState.() -> Boolean) = try {
+        if (!(luaState?.run(block) ?: throw LuaException("Lua is not initialized."))) {
             throw LuaException(luaState?.toString(-1))
         }
         true
