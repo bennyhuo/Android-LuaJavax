@@ -5,12 +5,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion(28)
-    buildToolsVersion("28.0.3")
+    compileSdkVersion(30)
 
     defaultConfig {
         minSdkVersion(16)
-        targetSdkVersion(28)
+        targetSdkVersion(30)
         versionCode = 1
         versionName = "1.0"
     }
@@ -30,7 +29,7 @@ android {
     }
 }
 
-tasks.withType(JavaCompile::class.java) {
+tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
