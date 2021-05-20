@@ -109,7 +109,7 @@ GlobalLua.luaVm.runFile(...)
 
 Bug Fix:
 
-1. [Bug] Wrong class argument passed into jni function calling javaNew. This will lead to that the 'new' method always returns nil when called from Lua on Java class.
+1. [Bug] Wrong class argument passed into jni function when calling javaNew. This will lead to that the 'new' method always returns nil when called from Lua on Java class.
 2. [Bug] Falsely removes the Lua state object when closing.
 3. [Bug] Error occurred when pass an expression of Java method call as an argument into another Java method call from Lua.
 4. [Bug] Use objectIndex instead of classIndex for Java Classes.
@@ -117,6 +117,6 @@ Bug Fix:
 Feature:
 
 1. [Feature] The original error message was simply something like 'Not a valid Java Object.'. I have added the Lua script line info when error calling Java api in Lua.
-2. [Feature] Add support to access fields and methods with the same name in Java object when calling Java api from Lua. Function in Lua is a first-class type so it is treated equally as other types like number or string, thus making keys in the Lua table must be different whatever types of the values are. However, This is not the case in Java since fields and methods are not the same things so they can share a identical name. When accessing a key, we can figure out whether it is a function call or a value access from the calling stack to make this work.
+2. [Feature] Add support to access fields and methods with the same name in Java object when calling Java api from Lua. Function in Lua is a first-class type so it is treated equally as other types like number or string, thus making keys in the Lua table must be different whatever types of the values are. However, This is not the case in Java since fields and methods are not the same thing so they can share an identical name. When accessing a key, we can figure out whether it is a function call or a value access from the calling stack to make this work.
 3. [Feature] Support Java vararg method call from Lua.
 4. [Feature] Support partially redirect stdio to Logcat.
