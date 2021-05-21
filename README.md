@@ -14,7 +14,7 @@
 I have deployed these modules to maven central, you may add this in your build.gradle: 
  
 ```
-implementation("com.bennyhuo.luajavax:1.0")
+implementation("com.bennyhuo:luajavax:1.0")
 ```
 
 ### SNAPSHOT
@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.bennyhuo.luajavax:1.0-SNAPSHOT")
+    implementation("com.bennyhuo:luajavax:1.0-SNAPSHOT")
 }
 ```
 
